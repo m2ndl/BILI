@@ -1,0 +1,1496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SLA MCQ Trainer</title>
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0A1020;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.09);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.18);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.72);
+      --muted2: rgba(234,240,255,.56);
+      --good:#2AE0A0;
+      --bad:#FF5C7A;
+      --warn:#FFCC66;
+      --accent:#8BA6FF;
+      --accent2:#B7C7FF;
+      --shadow: 0 20px 50px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(139,166,255,.30), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(42,224,160,.18), transparent 55%),
+        radial-gradient(900px 700px at 70% 110%, rgba(255,92,122,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    a{color:var(--accent2); text-decoration:none}
+    a:hover{text-decoration:underline}
+    button, input, select, textarea{font:inherit}
+
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(14px);
+      background: rgba(8,10,16,.55);
+      border-bottom: 1px solid var(--stroke);
+    }
+    .topbar-inner{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 220px;
+    }
+    .brand .title{
+      font-size: 15px;
+      letter-spacing: .2px;
+      font-weight: 700;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:99px;
+      background: linear-gradient(135deg, var(--accent), var(--good));
+      box-shadow: 0 0 0 4px rgba(139,166,255,.15);
+    }
+    .brand .sub{
+      color:var(--muted2);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .top-actions{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+    }
+    .pill strong{color:var(--text); font-weight:700}
+    .mini{
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease;
+    }
+    .mini:hover{border-color:var(--stroke2); background: rgba(255,255,255,.07)}
+    .mini:active{transform: translateY(1px)}
+    .mini.primary{
+      background: rgba(139,166,255,.12);
+      border-color: rgba(139,166,255,.25);
+      color: var(--text);
+    }
+    .mini.danger{
+      background: rgba(255,92,122,.10);
+      border-color: rgba(255,92,122,.22);
+      color: var(--text);
+    }
+
+    /* Layout */
+    .content{
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 18px;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      .content{
+        grid-template-columns: 1fr;
+      }
+      .brand{min-width:unset}
+    }
+
+    /* Cards */
+    .card{
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-header{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--stroke);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: rgba(255,255,255,.03);
+    }
+    .card-header h2{
+      margin:0;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .card-body{
+      padding: 14px 16px;
+    }
+    .hint{
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    /* Editor */
+    textarea{
+      width:100%;
+      min-height: 320px;
+      resize: vertical;
+      padding: 12px 12px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      line-height: 1.35;
+      font-family: var(--mono);
+      font-size: 12px;
+      outline:none;
+    }
+    textarea:focus{border-color: rgba(139,166,255,.35); box-shadow: 0 0 0 4px rgba(139,166,255,.10)}
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .row > *{flex:0 0 auto}
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width: 170px;
+    }
+    .label{
+      font-size: 12px;
+      color: var(--muted2);
+    }
+    select, input[type="text"]{
+      width:100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,.15);
+      color: var(--text);
+      outline:none;
+    }
+    select:focus, input[type="text"]:focus{border-color: rgba(139,166,255,.35); box-shadow: 0 0 0 4px rgba(139,166,255,.10)}
+
+    input[type="checkbox"]{transform: translateY(1px)}
+    .check{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+    }
+
+    /* Quiz */
+    .quiz-head{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .progress{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(139,166,255,.95), rgba(42,224,160,.9));
+      transition: width .25s ease;
+    }
+
+    .meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .meta strong{color:var(--text)}
+    .tag{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .qbox{
+      margin-top: 12px;
+      padding: 14px 14px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+    }
+
+    .qstem{
+      margin:0 0 12px 0;
+      font-size: 15px;
+      line-height: 1.45;
+      letter-spacing: .1px;
+      color: var(--text);
+    }
+
+    .opts{
+      display:grid;
+      gap:10px;
+    }
+    .opt{
+      width:100%;
+      text-align:left;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,.12);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .opt:hover{
+      border-color: var(--stroke2);
+      background: rgba(255,255,255,.06);
+    }
+    .opt:active{transform: translateY(1px)}
+    .opt .letter{
+      font-family: var(--mono);
+      width: 22px;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      display:grid;
+      place-items:center;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 1px;
+    }
+    .opt .txt{
+      flex:1;
+      line-height: 1.35;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .opt.selected{
+      border-color: rgba(139,166,255,.45);
+      background: rgba(139,166,255,.10);
+    }
+    .opt.correct{
+      border-color: rgba(42,224,160,.55);
+      background: rgba(42,224,160,.10);
+    }
+    .opt.incorrect{
+      border-color: rgba(255,92,122,.55);
+      background: rgba(255,92,122,.10);
+    }
+
+    .feedback{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .badge{
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      flex: 0 0 auto;
+    }
+    .badge.good{border-color: rgba(42,224,160,.55); background: rgba(42,224,160,.12); color: var(--good)}
+    .badge.bad{border-color: rgba(255,92,122,.55); background: rgba(255,92,122,.12); color: var(--bad)}
+    .badge.warn{border-color: rgba(255,204,102,.55); background: rgba(255,204,102,.10); color: var(--warn)}
+    .feedback strong{color:var(--text)}
+    .feedback .sub{
+      margin-top: 6px;
+      color: var(--muted2);
+    }
+
+    .controls{
+      margin-top: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .controls .left, .controls .right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .ghost{
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--stroke);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease;
+      font-size: 12px;
+    }
+    .ghost:hover{border-color:var(--stroke2); background: rgba(255,255,255,.06)}
+    .ghost:active{transform: translateY(1px)}
+    .ghost.primary{
+      background: rgba(139,166,255,.12);
+      border-color: rgba(139,166,255,.30);
+    }
+    .ghost.success{
+      background: rgba(42,224,160,.10);
+      border-color: rgba(42,224,160,.30);
+    }
+
+    .divider{
+      height: 1px;
+      background: var(--stroke);
+      margin: 12px 0;
+    }
+
+    /* Glossary / related */
+    .related{
+      margin-top: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+    }
+    .related .rhead{
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+    }
+    .related .rhead strong{
+      font-size: 12px;
+      letter-spacing: .2px;
+    }
+    .related .rbody{
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      display:grid;
+      gap:10px;
+    }
+    .gloss-item{
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: rgba(0,0,0,.10);
+      padding: 10px 10px;
+    }
+    .gloss-item .term{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent2);
+      margin-bottom: 6px;
+      letter-spacing:.1px;
+    }
+    .gloss-item .def{color: var(--muted)}
+    .muted{color:var(--muted2)}
+
+    /* Results */
+    .results{
+      display:none;
+    }
+    .score{
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .score .big{
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.6px;
+    }
+    .score .small{
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .breakdown{
+      margin-top: 14px;
+      display:grid;
+      gap:10px;
+    }
+    .brow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .brow strong{color:var(--text)}
+    .brow .pct{font-family: var(--mono); color: var(--accent2)}
+    .tiny{
+      font-size: 11px;
+      color: var(--muted2);
+      line-height: 1.4;
+    }
+
+    /* Mobile: editor/quiz tabs */
+    .tabs{
+      display:none;
+      gap:10px;
+      padding: 12px 18px 0 18px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .tabbtn{
+      flex:1;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      cursor:pointer;
+    }
+    .tabbtn.active{
+      background: rgba(139,166,255,.12);
+      border-color: rgba(139,166,255,.30);
+      color: var(--text);
+    }
+    @media (max-width: 980px){
+      .tabs{display:flex}
+      .content[data-view="quiz"] .leftpane{display:none}
+      .content[data-view="editor"] .rightpane{display:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="title"><span class="dot"></span> SLA MCQ Trainer</div>
+          <div class="sub">Paste your MCQ bank (from the previous message), then practice in study or exam mode.</div>
+        </div>
+
+        <div class="top-actions">
+          <div class="pill" id="bankStatus"><strong>0</strong> questions loaded</div>
+          <button class="mini primary" id="btnParse">Parse & Load</button>
+          <button class="mini" id="btnSaveBank">Save Bank</button>
+          <button class="mini danger" id="btnResetAll">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tabbtn active" id="tabEditor">Question Bank</button>
+      <button class="tabbtn" id="tabQuiz">Quiz</button>
+    </div>
+
+    <div class="content" id="content" data-view="editor">
+      <!-- LEFT: Bank editor -->
+      <div class="leftpane card">
+        <div class="card-header">
+          <h2>Question bank input</h2>
+          <div class="row">
+            <label class="mini" for="fileIn" style="cursor:pointer">Import .txt</label>
+            <input id="fileIn" type="file" accept=".txt" style="display:none" />
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="hint">
+            Paste the MCQ text exactly as provided (with <span class="muted">A) / B) / C) / D)</span> options and a
+            <span class="muted">Correct: X</span> line). The parser will detect headings such as
+            <span class="muted">Week 7</span> or <span class="muted">## Week 7</span> and group questions automatically.
+          </p>
+
+          <div class="divider"></div>
+
+          <textarea id="bankText" spellcheck="false"></textarea>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button class="ghost primary" id="btnLoadTemplate">Insert a parsing template</button>
+            <button class="ghost" id="btnClearBank">Clear text</button>
+          </div>
+
+          <p class="tiny" style="margin-top:12px">
+            Tip: After loading once, click <strong>Save Bank</strong>. The app will remember your bank locally in this browser.
+          </p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Quiz -->
+      <div class="rightpane card">
+        <div class="card-header">
+          <h2>Practice</h2>
+          <div class="row">
+            <button class="mini" id="btnStart">Start</button>
+            <button class="mini" id="btnFinish">Finish</button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="quiz-head">
+            <div class="row" style="justify-content:space-between; width:100%">
+              <div class="field" style="min-width:220px; flex:1">
+                <div class="label">Filter by section</div>
+                <select id="weekSelect" multiple size="5" aria-label="Section selector"></select>
+                <div class="hint">Ctrl/⌘-click for multi-select. Leave empty to include all.</div>
+              </div>
+
+              <div class="field" style="min-width:220px; flex:1">
+                <div class="label">Mode</div>
+                <select id="modeSelect" aria-label="Mode">
+                  <option value="study">Study mode (instant feedback)</option>
+                  <option value="exam">Exam mode (feedback at the end)</option>
+                </select>
+                <div class="divider"></div>
+                <div class="row">
+                  <label class="check"><input type="checkbox" id="shuffleChk" /> Shuffle questions</label>
+                  <label class="check"><input type="checkbox" id="onlyWrongChk" /> Practice wrong/blank only</label>
+                </div>
+                <div class="divider"></div>
+                <div class="field" style="min-width:220px">
+                  <div class="label">Search in stems</div>
+                  <input id="searchBox" type="text" placeholder="e.g., fossilization, i+1, CALP…" />
+                </div>
+              </div>
+            </div>
+
+            <div class="progress" aria-label="Progress">
+              <div class="bar" id="progBar"></div>
+            </div>
+
+            <div class="meta">
+              <div><strong id="metaIndex">—</strong> <span class="muted">/</span> <span id="metaTotal">—</span></div>
+              <div class="tag" id="metaWeek">No section loaded</div>
+              <div class="tag">Score: <span id="metaScore">0</span></div>
+            </div>
+          </div>
+
+          <div class="qbox" id="qbox">
+            <p class="qstem" id="qstem">Load your question bank, then click “Parse & Load”.</p>
+            <div class="opts" id="opts"></div>
+
+            <div class="feedback" id="feedback" style="display:none">
+              <div class="badge warn" id="fbBadge">i</div>
+              <div>
+                <div id="fbText"><strong>Tip:</strong> Use Study mode for instant feedback, Exam mode for a realistic run.</div>
+                <div class="sub" id="fbSub"></div>
+              </div>
+            </div>
+
+            <div class="related" id="related" style="display:none">
+              <div class="rhead">
+                <strong>Related content</strong>
+                <button class="mini" id="btnToggleRelated">Hide</button>
+              </div>
+              <div class="rbody" id="relatedBody"></div>
+            </div>
+
+            <div class="controls">
+              <div class="left">
+                <button class="ghost" id="btnPrev">Prev</button>
+                <button class="ghost" id="btnNext">Next</button>
+                <button class="ghost" id="btnSkip">Skip</button>
+              </div>
+              <div class="right">
+                <button class="ghost" id="btnMark">Mark</button>
+                <button class="ghost success" id="btnReviewWrong">Review wrong</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="results" id="results">
+            <div class="divider"></div>
+            <div class="score">
+              <div class="big" id="finalPct">0%</div>
+              <div class="small" id="finalLine">0 correct out of 0</div>
+              <div class="small" id="finalMode">Mode: —</div>
+            </div>
+            <div class="breakdown" id="breakdown"></div>
+            <div class="divider"></div>
+            <div class="row">
+              <button class="ghost primary" id="btnRestart">Restart</button>
+              <button class="ghost" id="btnExport">Export results (JSON)</button>
+            </div>
+            <p class="tiny" style="margin-top:12px">
+              Exam mode shows correctness only after you finish. Study mode shows it immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------------------------
+   1) Glossary (related content)
+---------------------------- */
+const GLOSSARY = [
+  ["critical period", "A strong claim that there is a biologically bounded window for language learning, after which native-like outcomes become much less likely."],
+  ["sensitive period", "A softer claim: age still matters, but effects are gradual and can vary by language component and learning conditions."],
+  ["ultimate attainment", "The learner’s long-term end state (how close they get to native-like performance after extended learning)."],
+  ["accent", "A pronunciation pattern that can signal non-nativeness; commonly used to discuss age effects in phonological development."],
+  ["phonology", "The sound system of a language (including pronunciation and accent)."],
+  ["morphosyntax", "Grammar and sentence structure (morphology + syntax)."],
+  ["lexical", "Vocabulary-related (words, meanings, and their use)."],
+  ["pragmatic", "Appropriate language use in context (social meaning, politeness, appropriateness)."],
+  ["plasticity", "The brain’s ability to change with experience; often used to explain why learning conditions shift across the lifespan."],
+  ["lateralization", "How language functions become specialized/organized across the brain’s hemispheres during development."],
+  ["myelination", "A developmental process that affects processing efficiency; often discussed as part of neurobiological age effects."],
+  ["i+1", "Comprehensible input that is slightly beyond the learner’s current level; linked to input-based accounts of acquisition."],
+  ["comprehensible input", "Input the learner can understand; often treated as the primary fuel for acquisition in input-based views."],
+  ["negotiation of meaning", "Interactive moves (clarification requests, confirmation checks, etc.) that modify input to aid understanding."],
+  ["negotiated input", "Input that becomes more comprehensible because it is modified through interaction."],
+  ["pushed output", "Output where learners are pushed to express precise meanings beyond their comfort level, which can drive learning."],
+  ["noticing", "Attention and awareness of language features; often treated as important for acquisition."],
+  ["salience", "How much a linguistic feature stands out and attracts attention in input."],
+  ["frequency effects", "The idea that high-frequency items/patterns tend to be learned earlier/stronger."],
+  ["collocation", "Words that commonly co-occur (e.g., strong coffee), important for natural lexical development."],
+  ["form-meaning", "Linking linguistic forms (grammar) to meanings/functions; central for grammatical development."],
+  ["developmental sequences", "Patterns where learners often acquire certain grammatical features in stages rather than any teacher-chosen order."],
+  ["bics", "Basic Interpersonal Communication Skills: everyday conversational language."],
+  ["calp", "Cognitive Academic Language Proficiency: academic language needed for study and complex texts."],
+  ["extroversion", "A personality dimension associated with more social interaction opportunities (not guaranteed accuracy)."],
+  ["trait anxiety", "A stable tendency to feel anxious across situations."],
+  ["state anxiety", "Temporary anxiety triggered by specific situations (e.g., oral exams)."],
+  ["self-efficacy", "Confidence about performing a specific task, not general confidence."],
+  ["attribution", "How learners explain success/failure (e.g., effort vs ability vs luck), which affects motivation and persistence."],
+  ["cultural sensitivity", "Understanding and respecting cultural norms while using the L2; supports adjustment and communication freedom."],
+  ["social identity", "Identity partly derived from group membership; language can signal belonging and social positioning."],
+  ["investment", "Commitment to language learning when it supports desired identities and access to valued social futures."],
+  ["code-switching", "Alternating languages/varieties in interaction; often used strategically to mark identity and manage relationships."],
+  ["accommodation", "Adjusting language to manage social distance (convergence to align; divergence to differentiate)."],
+  ["translanguaging", "Fluid use of a full linguistic repertoire rather than treating languages as sealed systems."],
+  ["fossilization", "Stabilization/cessation of interlanguage development despite continued exposure."],
+  ["transfer", "L1 influence on L2 learning (positive transfer helps; negative transfer interferes)."],
+  ["implicit learning", "Learning from exposure without conscious rule awareness; often associated with child acquisition."],
+  ["explicit learning", "Conscious rule-based learning; often more prominent in adult classroom learning."],
+];
+
+/* ---------------------------
+   2) Parsing (paste bank)
+---------------------------- */
+function parseBank(rawText){
+  const text = (rawText || "").replace(/\r\n/g, "\n");
+  const lines = text.split("\n");
+
+  let currentSection = "Ungrouped";
+  const sections = new Set();
+  const qs = [];
+
+  // helper
+  const clean = (s)=> (s || "").trim();
+
+  function normalizeSection(h){
+    // Accept: "Week 7", "## Week 7 — ..." etc
+    const m1 = h.match(/week\s*\d+/i);
+    if (m1) return m1[0].replace(/\s+/g," ").replace(/Week/i,"Week");
+    // else keep trimmed heading
+    return clean(h).slice(0, 60) || "Ungrouped";
+  }
+
+  let i=0;
+  while(i < lines.length){
+    const line = clean(lines[i]);
+
+    // Section heading
+    if (/^##\s*/.test(line) || /^week\s*\d+/i.test(line)){
+      currentSection = normalizeSection(line.replace(/^##\s*/,""));
+      sections.add(currentSection);
+      i++;
+      continue;
+    }
+
+    // Question start: "1) ..." or "56) ..."
+    const qMatch = line.match(/^(\d{1,4})\)\s*(.+)$/);
+    if (qMatch){
+      const id = Number(qMatch[1]);
+      const stem = clean(qMatch[2]);
+
+      // collect next 4 option lines
+      const opts = [];
+      let j = i+1;
+      while(j < lines.length && opts.length < 4){
+        const l2 = clean(lines[j]);
+        const om = l2.match(/^([A-D])\)\s*(.+)$/);
+        if (om){
+          opts.push(clean(om[2]));
+        }
+        j++;
+      }
+
+      // find correct line after options
+      let correct = null;
+      while(j < lines.length){
+        const l3 = clean(lines[j]);
+        const cm = l3.match(/Correct:\s*\**\s*([A-D])\s*\**/i);
+        if (cm){
+          correct = cm[1].toUpperCase();
+          break;
+        }
+        // stop if next question starts
+        if (/^\d{1,4}\)\s+/.test(l3) || /^##\s*/.test(l3) || /^week\s*\d+/i.test(l3)) break;
+        j++;
+      }
+
+      if (opts.length === 4 && correct){
+        sections.add(currentSection);
+        qs.push({
+          id,
+          section: currentSection,
+          stem,
+          options: opts,
+          answer: "ABCD".indexOf(correct),
+          marked: false
+        });
+      }
+
+      i = j + 1;
+      continue;
+    }
+
+    i++;
+  }
+
+  // sort by id if any
+  qs.sort((a,b)=>a.id-b.id);
+
+  return {
+    questions: qs,
+    sections: Array.from(sections).sort((a,b)=>{
+      const na = (a.match(/\d+/)||["9999"])[0];
+      const nb = (b.match(/\d+/)||["9999"])[0];
+      return Number(na) - Number(nb);
+    })
+  };
+}
+
+/* ---------------------------
+   3) App state
+---------------------------- */
+const LS = {
+  bank: "sla_mcq_bank_text_v1",
+  progress: "sla_mcq_progress_v1"
+};
+
+let BANK = {questions:[], sections:[]};
+let QUIZ = {
+  pool: [],
+  order: [],
+  idx: 0,
+  mode: "study",
+  examReveal: false,
+  answers: new Map(),   // qid -> {choice, correct, ts}
+  marked: new Set(),    // qid
+  finished: false
+};
+
+/* ---------------------------
+   4) UI references
+---------------------------- */
+const el = (id)=>document.getElementById(id);
+
+const bankText = el("bankText");
+const weekSelect = el("weekSelect");
+const modeSelect = el("modeSelect");
+const shuffleChk = el("shuffleChk");
+const onlyWrongChk = el("onlyWrongChk");
+const searchBox = el("searchBox");
+
+const bankStatus = el("bankStatus");
+const btnParse = el("btnParse");
+const btnSaveBank = el("btnSaveBank");
+const btnResetAll = el("btnResetAll");
+const btnLoadTemplate = el("btnLoadTemplate");
+const btnClearBank = el("btnClearBank");
+const fileIn = el("fileIn");
+
+const btnStart = el("btnStart");
+const btnFinish = el("btnFinish");
+
+const progBar = el("progBar");
+const metaIndex = el("metaIndex");
+const metaTotal = el("metaTotal");
+const metaWeek = el("metaWeek");
+const metaScore = el("metaScore");
+
+const qstem = el("qstem");
+const opts = el("opts");
+const feedback = el("feedback");
+const fbBadge = el("fbBadge");
+const fbText = el("fbText");
+const fbSub = el("fbSub");
+
+const related = el("related");
+const relatedBody = el("relatedBody");
+const btnToggleRelated = el("btnToggleRelated");
+
+const btnPrev = el("btnPrev");
+const btnNext = el("btnNext");
+const btnSkip = el("btnSkip");
+const btnMark = el("btnMark");
+const btnReviewWrong = el("btnReviewWrong");
+
+const results = el("results");
+const finalPct = el("finalPct");
+const finalLine = el("finalLine");
+const finalMode = el("finalMode");
+const breakdown = el("breakdown");
+const btnRestart = el("btnRestart");
+const btnExport = el("btnExport");
+
+/* Mobile tabs */
+const content = el("content");
+const tabEditor = el("tabEditor");
+const tabQuiz = el("tabQuiz");
+
+/* ---------------------------
+   5) Helpers
+---------------------------- */
+function shuffle(array){
+  const a = array.slice();
+  for (let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function safePct(n,d){
+  if (!d) return 0;
+  return Math.round((n/d)*100);
+}
+
+function setBankStatus(n){
+  bankStatus.innerHTML = `<strong>${n}</strong> questions loaded`;
+}
+
+function buildWeekSelect(sections){
+  weekSelect.innerHTML = "";
+  sections.forEach(s=>{
+    const o = document.createElement("option");
+    o.value = s;
+    o.textContent = s;
+    weekSelect.appendChild(o);
+  });
+}
+
+function getSelectedSections(){
+  const selected = Array.from(weekSelect.selectedOptions).map(o=>o.value);
+  return selected;
+}
+
+function buildPool(){
+  let pool = BANK.questions.slice();
+
+  // Filter by selected sections (if any)
+  const selectedSections = getSelectedSections();
+  if (selectedSections.length){
+    pool = pool.filter(q => selectedSections.includes(q.section));
+  }
+
+  // Search filter
+  const term = (searchBox.value || "").trim().toLowerCase();
+  if (term){
+    pool = pool.filter(q => q.stem.toLowerCase().includes(term));
+  }
+
+  // Wrong/blank only
+  if (onlyWrongChk.checked){
+    pool = pool.filter(q=>{
+      const a = QUIZ.answers.get(q.id);
+      return !a || a.correct === false;
+    });
+  }
+
+  // Order
+  let order = pool.map(q=>q.id);
+  if (shuffleChk.checked) order = shuffle(order);
+
+  return {pool, order};
+}
+
+function currentQuestion(){
+  if (!QUIZ.order.length) return null;
+  const qid = QUIZ.order[QUIZ.idx];
+  return QUIZ.pool.find(q=>q.id === qid) || null;
+}
+
+function scoreNow(){
+  let correct=0, answered=0;
+  for (const qid of QUIZ.order){
+    const a = QUIZ.answers.get(qid);
+    if (a && typeof a.choice === "number"){
+      answered++;
+      if (a.correct) correct++;
+    }
+  }
+  return {correct, answered, total: QUIZ.order.length};
+}
+
+function updateProgressUI(){
+  const {correct, answered, total} = scoreNow();
+  metaScore.textContent = `${correct}/${total}`;
+  metaTotal.textContent = total ? total : "—";
+  metaIndex.textContent = total ? (QUIZ.idx + 1) : "—";
+
+  const pct = total ? Math.round(((QUIZ.idx + 1) / total) * 100) : 0;
+  progBar.style.width = `${pct}%`;
+}
+
+function renderRelated(q){
+  if (!q){ related.style.display="none"; return; }
+
+  const hay = q.stem.toLowerCase();
+  const matches = [];
+  for (const [term, def] of GLOSSARY){
+    // match whole-ish terms (simple)
+    if (hay.includes(term.toLowerCase())){
+      matches.push([term, def]);
+    }
+  }
+
+  // Also match within options (helpful)
+  const optHay = q.options.join(" ").toLowerCase();
+  for (const [term, def] of GLOSSARY){
+    if (!matches.find(m=>m[0]===term) && optHay.includes(term.toLowerCase())){
+      matches.push([term, def]);
+    }
+  }
+
+  if (!matches.length){
+    related.style.display="none";
+    return;
+  }
+
+  relatedBody.innerHTML = matches.slice(0,6).map(([t,d])=>`
+    <div class="gloss-item">
+      <div class="term">${escapeHtml(t)}</div>
+      <div class="def">${escapeHtml(d)}</div>
+    </div>
+  `).join("");
+
+  related.style.display = "block";
+  btnToggleRelated.textContent = "Hide";
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function setFeedback(kind, mainHtml, subHtml=""){
+  feedback.style.display = "flex";
+  fbText.innerHTML = mainHtml;
+  fbSub.innerHTML = subHtml;
+
+  fbBadge.classList.remove("good","bad","warn");
+  if (kind === "good"){ fbBadge.classList.add("good"); fbBadge.textContent="✓"; }
+  else if (kind === "bad"){ fbBadge.classList.add("bad"); fbBadge.textContent="✕"; }
+  else { fbBadge.classList.add("warn"); fbBadge.textContent="i"; }
+}
+
+function clearFeedback(){
+  feedback.style.display = "none";
+  fbText.textContent = "";
+  fbSub.textContent = "";
+}
+
+function setModeUI(){
+  QUIZ.mode = modeSelect.value;
+  QUIZ.examReveal = (QUIZ.mode === "exam");
+}
+
+/* ---------------------------
+   6) Rendering question
+---------------------------- */
+function renderQuestion(){
+  results.style.display = "none";
+  const q = currentQuestion();
+  if (!q){
+    qstem.textContent = "No questions in the current pool. Adjust filters or load a question bank.";
+    opts.innerHTML = "";
+    metaWeek.textContent = "No section loaded";
+    clearFeedback();
+    related.style.display = "none";
+    updateProgressUI();
+    return;
+  }
+
+  metaWeek.textContent = q.section || "Ungrouped";
+  qstem.textContent = q.stem;
+
+  const answerRec = QUIZ.answers.get(q.id);
+  const selected = answerRec ? answerRec.choice : null;
+
+  const revealNow = (!QUIZ.examReveal) && (selected !== null && selected !== undefined);
+
+  const correctIndex = q.answer;
+
+  opts.innerHTML = q.options.map((txt, idx)=>{
+    const letter = "ABCD"[idx];
+    let cls = "opt";
+    if (selected === idx) cls += " selected";
+    if (revealNow){
+      if (idx === correctIndex) cls += " correct";
+      if (selected === idx && selected !== correctIndex) cls += " incorrect";
+    }
+    return `
+      <button class="${cls}" data-idx="${idx}" aria-label="Option ${letter}">
+        <span class="letter">${letter}</span>
+        <span class="txt">${escapeHtml(txt)}</span>
+      </button>
+    `;
+  }).join("");
+
+  // Mark button state
+  const isMarked = QUIZ.marked.has(q.id);
+  btnMark.textContent = isMarked ? "Unmark" : "Mark";
+
+  // Feedback
+  if (QUIZ.examReveal){
+    if (selected === null || selected === undefined){
+      setFeedback("warn", "<strong>Exam mode:</strong> choose an answer, then move on.", "Correctness will be shown after you click Finish.");
+    } else {
+      setFeedback("warn", "<strong>Exam mode:</strong> answer saved.", "Correctness will be shown after you click Finish.");
+    }
+  } else {
+    if (selected === null || selected === undefined){
+      setFeedback("warn", "<strong>Study mode:</strong> choose an answer to get instant feedback.", "");
+    } else if (selected === correctIndex){
+      setFeedback("good", "<strong>Correct.</strong>", `You selected <strong>${"ABCD"[selected]}</strong>.`);
+    } else {
+      setFeedback("bad", "<strong>Incorrect.</strong>", `Correct answer: <strong>${"ABCD"[correctIndex]}</strong>. Your choice: <strong>${"ABCD"[selected]}</strong>.`);
+    }
+  }
+
+  renderRelated(q);
+  updateProgressUI();
+  persistProgress();
+}
+
+function persistProgress(){
+  const payload = {
+    answers: Array.from(QUIZ.answers.entries()),
+    marked: Array.from(QUIZ.marked.values())
+  };
+  localStorage.setItem(LS.progress, JSON.stringify(payload));
+}
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(LS.progress);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    QUIZ.answers = new Map(p.answers || []);
+    QUIZ.marked = new Set(p.marked || []);
+  }catch(e){}
+}
+
+/* ---------------------------
+   7) Answer selection
+---------------------------- */
+function onChoose(idx){
+  const q = currentQuestion();
+  if (!q || QUIZ.finished) return;
+
+  const choice = idx;
+  const correct = (choice === q.answer);
+
+  QUIZ.answers.set(q.id, {choice, correct, ts: Date.now()});
+  renderQuestion();
+}
+
+opts.addEventListener("click", (e)=>{
+  const btn = e.target.closest("button.opt");
+  if (!btn) return;
+  const idx = Number(btn.dataset.idx);
+  if (Number.isFinite(idx)) onChoose(idx);
+});
+
+/* ---------------------------
+   8) Navigation / controls
+---------------------------- */
+function go(delta){
+  if (!QUIZ.order.length) return;
+  const next = Math.max(0, Math.min(QUIZ.order.length-1, QUIZ.idx + delta));
+  QUIZ.idx = next;
+  renderQuestion();
+}
+
+btnPrev.addEventListener("click", ()=>go(-1));
+btnNext.addEventListener("click", ()=>go(1));
+btnSkip.addEventListener("click", ()=>{
+  go(1);
+});
+
+btnMark.addEventListener("click", ()=>{
+  const q = currentQuestion();
+  if (!q) return;
+  if (QUIZ.marked.has(q.id)) QUIZ.marked.delete(q.id);
+  else QUIZ.marked.add(q.id);
+  renderQuestion();
+});
+
+btnReviewWrong.addEventListener("click", ()=>{
+  // Build a pool of wrong answers based on current order
+  const wrongIds = QUIZ.order.filter(qid=>{
+    const a = QUIZ.answers.get(qid);
+    return a && a.correct === false;
+  });
+
+  if (!wrongIds.length){
+    setFeedback("good", "<strong>No wrong answers to review.</strong>", "Try enabling “Practice wrong/blank only” and restarting, or continue practicing.");
+    return;
+  }
+
+  QUIZ.order = wrongIds;
+  QUIZ.idx = 0;
+  QUIZ.finished = false;
+  renderQuestion();
+});
+
+/* Related toggler */
+btnToggleRelated.addEventListener("click", ()=>{
+  if (related.style.display === "none") return;
+  const visible = relatedBody.style.display !== "none";
+  relatedBody.style.display = visible ? "none" : "grid";
+  btnToggleRelated.textContent = visible ? "Show" : "Hide";
+});
+
+/* ---------------------------
+   9) Starting / finishing
+---------------------------- */
+function startQuiz(){
+  setModeUI();
+  const {pool, order} = buildPool();
+  QUIZ.pool = pool;
+  QUIZ.order = order;
+  QUIZ.idx = 0;
+  QUIZ.finished = false;
+
+  renderQuestion();
+}
+
+btnStart.addEventListener("click", startQuiz);
+
+function finishQuiz(){
+  QUIZ.finished = true;
+  // Reveal correctness in exam mode now
+  const wasExam = (QUIZ.mode === "exam");
+
+  const {correct, answered, total} = scoreNow();
+  const pct = safePct(correct, total);
+
+  finalPct.textContent = `${pct}%`;
+  finalLine.textContent = `${correct} correct out of ${total} (answered: ${answered})`;
+  finalMode.textContent = `Mode: ${QUIZ.mode === "exam" ? "Exam (revealed now)" : "Study"}`;
+
+  // Breakdown by section
+  const bySection = new Map();
+  for (const qid of QUIZ.order){
+    const q = QUIZ.pool.find(x=>x.id===qid);
+    const sec = (q && q.section) ? q.section : "Ungrouped";
+    if (!bySection.has(sec)) bySection.set(sec, {correct:0,total:0});
+    const rec = bySection.get(sec);
+    rec.total += 1;
+    const a = QUIZ.answers.get(qid);
+    if (a && a.correct) rec.correct += 1;
+  }
+
+  breakdown.innerHTML = Array.from(bySection.entries()).map(([sec, s])=>{
+    const p = safePct(s.correct, s.total);
+    return `
+      <div class="brow">
+        <div><strong>${escapeHtml(sec)}</strong><div class="tiny">${s.correct}/${s.total} correct</div></div>
+        <div class="pct">${p}%</div>
+      </div>
+    `;
+  }).join("");
+
+  results.style.display = "block";
+
+  if (wasExam){
+    // Show the current question with reveal
+    QUIZ.examReveal = false; // allow reveal coloring now
+    renderQuestion();
+  }
+}
+
+btnFinish.addEventListener("click", finishQuiz);
+
+btnRestart.addEventListener("click", ()=>{
+  startQuiz();
+});
+
+btnExport.addEventListener("click", ()=>{
+  const {correct, answered, total} = scoreNow();
+  const out = {
+    exportedAt: new Date().toISOString(),
+    mode: QUIZ.mode,
+    score: {correct, answered, total},
+    answers: Array.from(QUIZ.answers.entries()).map(([qid, rec])=>({qid, ...rec})),
+    marked: Array.from(QUIZ.marked.values())
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sla-mcq-results.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------------------------
+   10) Bank loading / saving
+---------------------------- */
+function loadSavedBank(){
+  const saved = localStorage.getItem(LS.bank);
+  if (saved){
+    bankText.value = saved;
+  } else {
+    bankText.value = "";
+  }
+}
+
+function saveBank(){
+  localStorage.setItem(LS.bank, bankText.value || "");
+}
+
+btnSaveBank.addEventListener("click", ()=>{
+  saveBank();
+  setFeedback("good", "<strong>Saved.</strong>", "Your question bank was saved locally in this browser.");
+});
+
+btnParse.addEventListener("click", ()=>{
+  const {questions, sections} = parseBank(bankText.value || "");
+  BANK.questions = questions;
+  BANK.sections = sections.filter(s=>s && s!=="Ungrouped");
+
+  // If everything is ungrouped, still show it
+  const anyUngrouped = questions.some(q=>!q.section || q.section==="Ungrouped");
+  if (anyUngrouped) BANK.sections.push("Ungrouped");
+
+  buildWeekSelect(BANK.sections.length ? BANK.sections : ["Ungrouped"]);
+  setBankStatus(BANK.questions.length);
+
+  // Try to load old progress (if any)
+  loadProgress();
+
+  // Start quiz automatically if questions exist
+  if (BANK.questions.length){
+    setFeedback("good", "<strong>Loaded.</strong>", "Now click Start, or adjust filters and mode first.");
+    // Switch to quiz tab on mobile
+    setView("quiz");
+    renderQuestion(); // show first question if pool not built yet
+  } else {
+    setFeedback("bad", "<strong>No questions parsed.</strong>", "Make sure your pasted text includes A) B) C) D) lines and a “Correct: X” line for each question.");
+  }
+});
+
+btnResetAll.addEventListener("click", ()=>{
+  if (!confirm("Reset bank + progress stored in this browser?")) return;
+  localStorage.removeItem(LS.bank);
+  localStorage.removeItem(LS.progress);
+  BANK = {questions:[], sections:[]};
+  QUIZ.answers = new Map();
+  QUIZ.marked = new Set();
+  QUIZ.pool = [];
+  QUIZ.order = [];
+  QUIZ.idx = 0;
+  bankText.value = "";
+  buildWeekSelect([]);
+  setBankStatus(0);
+  setFeedback("warn", "<strong>Reset complete.</strong>", "Paste your bank again and click Parse & Load.");
+  renderQuestion();
+});
+
+btnClearBank.addEventListener("click", ()=>{
+  bankText.value = "";
+});
+
+btnLoadTemplate.addEventListener("click", ()=>{
+  bankText.value =
+`## Week 7 — Example
+1) A “critical period” claim is primarily about:
+A) Teaching style changes
+B) Biological timing constraints
+C) Learner personality traits
+D) Classroom size
+Correct: B
+
+2) “Comprehensible input” is most directly linked to:
+A) Krashen
+B) Long
+C) Swain
+D) Schmidt
+Correct: A
+
+## Week 8 — Example
+3) Trait anxiety is best defined as:
+A) Temporary exam stress only
+B) Stable anxiety tendency
+C) Anxiety caused only by teachers
+D) Anxiety cured by vocabulary lists
+Correct: B
+`;
+  setFeedback("warn", "<strong>Template inserted.</strong>", "Replace it by pasting your full question bank, then click Parse & Load.");
+});
+
+/* Import .txt */
+fileIn.addEventListener("change", async (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const txt = await f.text();
+  bankText.value = txt;
+  setFeedback("warn", "<strong>Imported.</strong>", "Now click Parse & Load.");
+  fileIn.value = "";
+});
+
+/* Auto-save bank text as user types (lightweight) */
+let saveTimer = null;
+bankText.addEventListener("input", ()=>{
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>saveBank(), 500);
+});
+
+/* Filters rerender (doesn’t restart unless Start pressed) */
+[weekSelect, modeSelect, shuffleChk, onlyWrongChk, searchBox].forEach(x=>{
+  x.addEventListener("change", ()=>{ /* no-op; user clicks Start */ });
+});
+searchBox.addEventListener("keydown",(e)=>{
+  if (e.key === "Enter") startQuiz();
+});
+
+/* ---------------------------
+   11) Mobile view tabs
+---------------------------- */
+function setView(which){
+  content.dataset.view = which;
+  tabEditor.classList.toggle("active", which==="editor");
+  tabQuiz.classList.toggle("active", which==="quiz");
+}
+tabEditor.addEventListener("click", ()=>setView("editor"));
+tabQuiz.addEventListener("click", ()=>setView("quiz"));
+
+/* ---------------------------
+   12) Boot
+---------------------------- */
+(function init(){
+  loadSavedBank();
+  setBankStatus(0);
+
+  // If bank exists, parse automatically once (non-intrusive)
+  if ((bankText.value || "").trim()){
+    const {questions, sections} = parseBank(bankText.value || "");
+    BANK.questions = questions;
+    BANK.sections = sections.filter(s=>s && s!=="Ungrouped");
+    if (questions.some(q=>!q.section || q.section==="Ungrouped")) BANK.sections.push("Ungrouped");
+    buildWeekSelect(BANK.sections.length ? BANK.sections : ["Ungrouped"]);
+    setBankStatus(BANK.questions.length);
+    loadProgress();
+  } else {
+    buildWeekSelect([]);
+  }
+
+  renderQuestion();
+})();
+</script>
+</body>
+</html>
